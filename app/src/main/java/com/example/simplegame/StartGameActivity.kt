@@ -12,7 +12,5 @@ class StartGameActivity : AppCompatActivity() {
 
         val gameView = GameView(this)
         setContentView(gameView)
-
-        val displayMetrics = DisplayMetrics()
     }
 }

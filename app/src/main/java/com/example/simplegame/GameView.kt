@@ -3,11 +3,11 @@ package com.example.simplegame
 import android.app.Activity
 import android.content.Context
 import android.graphics.*
+import android.media.MediaPlayer
 import android.os.Handler
 import android.view.Display
 import android.view.MotionEvent
 import android.view.View
-import kotlin.random.Random
 
 class GameView(context: Context?) : View(context) {
 
@@ -32,11 +32,11 @@ class GameView(context: Context?) : View(context) {
     var numberOfTubes: Int = 3
     var distanceBetweenTubes: Int
     var tubeX = IntArray(numberOfTubes)
-    var topTubeY = IntArray(numberOfTubes)
+    var tubeY = IntArray(numberOfTubes)
     var topTube: Bitmap
     var bottomTube: Bitmap
-    var tubeVelocity:Int = 8
-
+    var tubeVelocity: Int = 8
+    var flapSound: MediaPlayer? = MediaPlayer.create(context, R.raw.flap)
 
 
     override fun onDraw(canvas: Canvas) {
@@ -55,23 +55,28 @@ class GameView(context: Context?) : View(context) {
                 velocity += gravity
                 birdY += velocity
             }
-            for (i in 0..numberOfTubes-1) {
-                tubeX[i]-=tubeVelocity
-                if (tubeX[i]<topTube.width-500){
-                    tubeX[i]+=numberOfTubes*distanceBetweenTubes
+            for (i in 0..numberOfTubes - 1) {
+                tubeX[i] -= tubeVelocity
+                if (tubeX[i] < topTube.width - 500) {
+                    tubeX[i] += numberOfTubes * distanceBetweenTubes
                 }
                 canvas.drawBitmap(
-                    topTube,
-                    tubeX[i].toFloat(),
-                    (topTubeY[i] - topTube.height).toFloat(),
-                    null
+                    topTube, tubeX[i].toFloat(), (tubeY[i] - topTube.height).toFloat(), null
                 )
+
                 canvas.drawBitmap(
-                    bottomTube,
-                    tubeX[i].toFloat(),
-                    (topTubeY[i] + gap).toFloat(),
-                    null
+                    bottomTube, tubeX[i].toFloat(), (tubeY[i] + gap).toFloat(), null
                 )
+                if (birdY <= tubeY[i]  || birdY >= tubeY[i] + gap- birds[0]?.height!!) {
+                    if (birdX>tubeX[i]-bottomTube.width/2&&birdX<tubeX[i]+bottomTube.width/2){
+                        playFlap()
+                    }
+                }
+
+
+
+
+
             }
         }
         canvas.drawBitmap(birds[birdFrame]!!, birdX.toFloat(), birdY.toFloat(), null)
@@ -79,6 +84,8 @@ class GameView(context: Context?) : View(context) {
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+//        playFlap()
+
         val action = event?.action
         when (action) {
             MotionEvent.ACTION_DOWN -> {
@@ -87,6 +94,14 @@ class GameView(context: Context?) : View(context) {
             }
         }
         return true
+    }
+
+    private fun playFlap() {
+        flapSound?.start()
+    }
+
+    private fun pauseFlap() {
+        flapSound?.pause()
     }
 
     init {
@@ -111,10 +126,11 @@ class GameView(context: Context?) : View(context) {
         minTubeOfSet = gap / 2
         maxTubeOfSet = dHeight - minTubeOfSet - gap
 
-          var random: java.util.Random= java.util.Random()
-        for (i in 0..numberOfTubes-1){
-            tubeX[i] = i*distanceBetweenTubes
-            topTubeY[i]=minTubeOfSet+ random.nextInt(maxTubeOfSet-minTubeOfSet+1)
+
+        var random: java.util.Random = java.util.Random()
+        for (i in 0..numberOfTubes - 1) {
+            tubeX[i] = i * distanceBetweenTubes
+            tubeY[i] = minTubeOfSet + random.nextInt(maxTubeOfSet - minTubeOfSet + 1)
         }
 
 
